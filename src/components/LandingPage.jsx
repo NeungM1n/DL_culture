@@ -1,12 +1,62 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 const LandingPage = ({ onUpload }) => {
     const fileInputRef = useRef(null);
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             onUpload(file);
+        }
+    };
+
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            setIsCameraOpen(true);
+            // Wait for modal to render
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            }, 100);
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            alert("카메라에 접근할 수 없습니다. 권한을 확인해주세요.");
+        }
+    };
+
+    const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+            const tracks = videoRef.current.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            videoRef.current.srcObject = null;
+        }
+        setIsCameraOpen(false);
+    };
+
+    const captureImage = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+
+            // Set canvas size to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame to canvas
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert to file
+            canvas.toBlob((blob) => {
+                const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+                onUpload(file);
+                stopCamera();
+            }, 'image/jpeg');
         }
     };
 
@@ -44,12 +94,34 @@ const LandingPage = ({ onUpload }) => {
                 onChange={handleFileChange}
             />
 
-            <button
-                className="btn-primary"
-                onClick={() => fileInputRef.current.click()}
-            >
-                사진 촬영 / 업로드
-            </button>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                <button
+                    className="btn-primary"
+                    onClick={() => fileInputRef.current.click()}
+                >
+                    사진 업로드
+                </button>
+                <button
+                    className="btn-secondary"
+                    onClick={startCamera}
+                >
+                    카메라 켜기
+                </button>
+            </div>
+
+            {/* Camera Modal */}
+            {isCameraOpen && (
+                <div className="camera-modal-overlay">
+                    <div className="camera-modal-content">
+                        <button className="btn-close" onClick={stopCamera}>&times;</button>
+                        <video ref={videoRef} autoPlay playsInline className="camera-video"></video>
+                        <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
+                        <div className="camera-controls">
+                            <button className="btn-capture" onClick={captureImage}></button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
