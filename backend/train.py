@@ -9,7 +9,7 @@ from model import get_model
 # ==========================================
 # [설정] 학습 파라미터 (여기서 값을 수정하세요)
 # ==========================================
-NUM_EPOCHS = 10        # 학습 반복 횟수 (너무 크면 과적합, 너무 작으면 학습 부족)
+NUM_EPOCHS = 30        # 학습 반복 횟수 (GPU니까 30번으로 증가!)
 BATCH_SIZE = 4         # 한 번에 학습할 이미지 수 (컴퓨터 성능에 따라 조절)
 LEARNING_RATE = 0.001  # 학습 속도 (너무 크면 발산, 너무 작으면 느림)
 DATA_DIR = 'dataset'   # 데이터셋 폴더 이름
@@ -22,9 +22,12 @@ def train_model():
         print("Please create 'dataset' folder and put images in subfolders named after their class.")
         return
 
-    # Data transformations
+    # Data transformations with Augmentation
     data_transforms = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.RandomHorizontalFlip(),  # 좌우 반전
+        transforms.RandomRotation(15),      # 살짝 회전
+        transforms.ColorJitter(brightness=0.2, contrast=0.2), # 밝기/대비 변화
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
@@ -53,12 +56,28 @@ def train_model():
     model = get_model(num_classes)
     model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss()
+    # Calculate class weights for imbalance handling
+    class_counts = [0] * num_classes
+    for _, label in dataset:
+        class_counts[label] += 1
+    
+    print(f"Class counts: {dict(zip(class_names, class_counts))}")
+    
+    # Calculate weights: Total / (NumClasses * ClassCount)
+    total_samples = sum(class_counts)
+    class_weights = [total_samples / (num_classes * count) if count > 0 else 1.0 for count in class_counts]
+    class_weights_tensor = torch.FloatTensor(class_weights).to(device)
+    print(f"Class weights: {class_weights}")
+
+    criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
 
     # Training loop
     for epoch in range(NUM_EPOCHS):
         running_loss = 0.0
+        correct = 0
+        total = 0
+        
         for inputs, labels in dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -71,8 +90,15 @@ def train_model():
             optimizer.step()
 
             running_loss += loss.item()
+            
+            # Calculate Accuracy
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
 
-        print(f'Epoch {epoch+1}/{NUM_EPOCHS}, Loss: {running_loss/len(dataloader):.4f}')
+        epoch_loss = running_loss / len(dataloader)
+        epoch_acc = 100 * correct / total
+        print(f'Epoch {epoch+1}/{NUM_EPOCHS}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.2f}%')
 
     # Save model and class names
     torch.save(model.state_dict(), 'culture_model.pth')

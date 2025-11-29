@@ -61,11 +61,15 @@ const ResultPage = ({ result, image, onReset, onChat }) => {
                                     padding: '6px 12px',
                                     borderRadius: '20px',
                                     fontSize: '0.85rem',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
                                 }}
-                                onClick={() => alert('이 기능은 아직 구현되지 않았습니다. (대안 선택)')}
+                                onClick={() => alert(`'${alt.name}' 선택 기능은 추후 업데이트 예정입니다.`)}
                             >
-                                {alt}
+                                <span>{alt.name}</span>
+                                <span style={{ opacity: 0.7, fontSize: '0.75rem' }}>{alt.confidence}%</span>
                             </span>
                         ))}
                     </div>

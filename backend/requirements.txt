@@ -7,3 +7,4 @@ pillow
 numpy
 google-generativeai
 python-dotenv
+icrawler

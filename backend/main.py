@@ -94,15 +94,25 @@ async def predict(file: UploadFile = File(...)):
     with torch.no_grad():
         outputs = model(tensor)
         probabilities = torch.nn.functional.softmax(outputs, dim=1)
-        confidence, predicted = torch.max(probabilities, 1)
         
-    class_name = class_names[predicted.item()]
-    confidence_score = int(confidence.item() * 100)
+        # Get Top 4 (1 Answer + 3 Alternatives)
+        topk_probs, topk_indices = torch.topk(probabilities, min(4, len(class_names)))
+        
+    # Main Answer (Rank 1)
+    predicted_index = topk_indices[0][0].item()
+    confidence_score = int(topk_probs[0][0].item() * 100)
+    class_name = class_names[predicted_index]
     
-    # Get top 3 alternatives
-    top3_prob, top3_idx = torch.topk(probabilities, min(3, len(class_names)))
-    alternatives = [class_names[idx.item()] for idx in top3_idx[0] if idx.item() != predicted.item()]
-    
+    # Alternatives (Rank 2, 3, 4)
+    alternatives = []
+    for i in range(1, len(topk_indices[0])):
+        idx = topk_indices[0][i].item()
+        prob = int(topk_probs[0][i].item() * 100)
+        alternatives.append({
+            "name": class_names[idx],
+            "confidence": prob
+        })
+
     description = DESCRIPTIONS.get(class_name, "설명이 준비되지 않은 문화재입니다.")
     
     return {
