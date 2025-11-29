@@ -32,6 +32,26 @@ export const analyzeImage = async (file) => {
 };
 
 export const chatWithAI = async (message, context, history) => {
-    // Chat is not yet implemented in Python backend
-    return `[시스템] 현재 딥러닝 모델 모드에서는 채팅 기능이 제한됩니다.\n식별된 문화재: ${context.name}`;
+    try {
+        const response = await fetch('http://localhost:8000/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                context: context.name || "알 수 없는 문화재"
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Backend Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.reply;
+    } catch (error) {
+        console.error("Chat Error:", error);
+        return "죄송합니다. AI 서버와 연결할 수 없습니다.";
+    }
 };

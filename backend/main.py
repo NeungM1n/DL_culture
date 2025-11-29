@@ -1,11 +1,18 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import torch
 from torchvision import transforms
 from PIL import Image
 import io
 from model import get_model
 import os
+import json
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = FastAPI()
 
@@ -18,6 +25,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Configure Gemini
+API_KEY = os.getenv("VITE_API_KEY")
+if API_KEY:
+    genai.configure(api_key=API_KEY)
+else:
+    print("Warning: VITE_API_KEY not found in .env")
+
 # Load Model and Classes
 MODEL_PATH = 'culture_model.pth'
 CLASS_NAMES_PATH = 'class_names.txt'
@@ -25,8 +39,6 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model = None
 class_names = []
-
-import json
 
 # Load Descriptions
 DESCRIPTIONS_PATH = 'descriptions.json'
@@ -99,6 +111,35 @@ async def predict(file: UploadFile = File(...)):
         "matchPercentage": confidence_score,
         "alternatives": alternatives
     }
+
+class ChatRequest(BaseModel):
+    message: str
+    context: str
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    if not API_KEY:
+        raise HTTPException(status_code=500, detail="API Key not configured")
+    
+    try:
+        # Use gemini-2.0-flash (Working with billing)
+        model = genai.GenerativeModel('gemini-2.0-flash')
+        
+        prompt = f"""
+        당신은 한국 문화재 전문가 AI입니다.
+        현재 사용자가 보고 있는 문화재는 '{request.context}'입니다.
+        
+        사용자의 질문: {request.message}
+        
+        이 문화재에 대한 정확하고 친절한 설명을 제공해주세요.
+        만약 질문이 문화재와 관련이 없다면, 정중하게 문화재 관련 질문을 유도해주세요.
+        """
+        
+        response = model.generate_content(prompt)
+        return {"reply": response.text}
+    except Exception as e:
+        print(f"Chat Error: {e}")
+        return {"reply": f"죄송합니다. 오류가 발생했습니다.\n({str(e)})"}
 
 @app.get("/")
 def read_root():
