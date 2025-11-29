@@ -1,16 +1,93 @@
-# React + Vite
+# 🏛️ CultureFinder (문화재 찾기)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+인공지능(AI)을 활용하여 우리 문화재를 쉽고 빠르게 찾고, 상세한 설명을 제공하는 웹 서비스입니다.
 
-Currently, two official plugins are available:
+## ✨ 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **📸 사진 촬영 및 업로드**: 문화재 사진을 직접 찍거나 업로드하여 검색할 수 있습니다.
+*   **🧠 AI 이미지 분석**: 학습된 딥러닝 모델(ResNet18)이 이미지를 분석하여 문화재 이름을 식별합니다.
+*   **📖 상세 정보 제공**: 식별된 문화재에 대한 풍부한 설명과 이야기를 제공합니다.
+*   **🎨 모던한 UI**: Glassmorphism 디자인을 적용하여 깔끔하고 세련된 사용자 경험을 제공합니다.
 
-## React Compiler
+## 🛠️ 기술 스택 (Tech Stack)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+*   **Frontend**: React, Vite, Vanilla CSS
+*   **Backend**: Python, FastAPI
+*   **AI/ML**: PyTorch, torchvision (ResNet18)
 
-## Expanding the ESLint configuration
+## 🚀 설치 및 실행 방법 (Getting Started)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+이 프로젝트는 **Frontend(React)**와 **Backend(Python)** 두 부분으로 나뉘어 있습니다.
+
+### 1. Backend 설정 (Python)
+
+먼저 백엔드 서버를 설정하고 AI 모델을 준비해야 합니다.
+
+```bash
+# 1. backend 폴더로 이동
+cd backend
+
+# 2. 필요한 파이썬 라이브러리 설치
+pip install -r requirements.txt
+```
+
+#### 📊 데이터셋 준비 및 모델 학습
+
+이 프로젝트는 **사용자 정의 데이터**로 학습하는 구조입니다.
+
+1.  `backend/dataset` 폴더 안에 문화재 이름으로 폴더를 만들고, 각 폴더에 사진을 10장 이상 넣으세요.
+    *   예: `backend/dataset/gyeongbokgung/` (경복궁 사진들)
+    *   예: `backend/dataset/sungnyemun/` (숭례문 사진들)
+2.  데이터가 잘 준비되었는지 확인합니다.
+    ```bash
+    python check_dataset.py
+    ```
+3.  모델을 학습시킵니다. (학습이 완료되면 `culture_model.pth` 파일이 생성됩니다.)
+    ```bash
+    python train.py
+    ```
+
+#### ▶️ 백엔드 서버 실행
+
+```bash
+# 모델 학습이 끝난 후 서버 실행
+uvicorn main:app --reload
+```
+*   서버는 `http://localhost:8000`에서 실행됩니다.
+
+---
+
+### 2. Frontend 설정 (React)
+
+새로운 터미널 창을 열고 프론트엔드를 실행합니다.
+
+```bash
+# 1. 프로젝트 루트 폴더에서 의존성 설치
+npm install
+
+# 2. 개발 서버 실행
+npm run dev
+```
+*   브라우저에서 `http://localhost:5173`으로 접속하여 앱을 사용하세요.
+
+## 📂 프로젝트 구조
+
+```
+CultureFinder/
+├── backend/               # Python 백엔드
+│   ├── dataset/           # 학습용 이미지 데이터 (직접 생성 필요)
+│   ├── main.py            # FastAPI 서버 메인 파일
+│   ├── model.py           # PyTorch 모델 정의 (ResNet18)
+│   ├── train.py           # 모델 학습 스크립트
+│   ├── check_dataset.py   # 데이터셋 점검 스크립트
+│   └── descriptions.json  # 문화재 설명 데이터
+├── src/                   # React 프론트엔드
+│   ├── components/        # UI 컴포넌트
+│   ├── services/          # API 통신 로직
+│   └── App.jsx            # 메인 앱 컴포넌트
+└── README.md              # 프로젝트 설명서
+```
+
+## 📝 라이선스
+
+이 프로젝트는 학습 및 포트폴리오 목적으로 제작되었습니다.
