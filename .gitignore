@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Model & Data
+*.pth
+backend/dataset/
+backend/culture_model.pth
+backend/class_names.txt
