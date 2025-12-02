@@ -108,4 +108,20 @@ def train_model():
     print("Training complete. Model saved as 'culture_model.pth'")
 
 if __name__ == '__main__':
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Cultural Heritage Model Trainer")
+    parser.add_argument("--epochs", type=int, default=30, help="Number of epochs")
+    parser.add_argument("--batch", type=int, default=4, help="Batch size")
+    parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
+    parser.add_argument("--dir", type=str, default='dataset', help="Dataset directory")
+    
+    args = parser.parse_args()
+    
+    # Update global variables with args
+    NUM_EPOCHS = args.epochs
+    BATCH_SIZE = args.batch
+    LEARNING_RATE = args.lr
+    DATA_DIR = args.dir
+    
     train_model()

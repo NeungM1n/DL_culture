@@ -31,6 +31,10 @@ def augment_dataset(data_dir='dataset', target_count=200):
         if current_count >= target_count:
             print(f"  -> Already has enough images. Skipping.")
             continue
+
+        if current_count == 0:
+            print(f"  -> No images found to augment. Skipping.")
+            continue
             
         needed = target_count - current_count
         print(f"  -> Generating {needed} augmented images...")
@@ -58,8 +62,13 @@ def augment_dataset(data_dir='dataset', target_count=200):
         print(f"  -> Done! Now has {len(os.listdir(class_dir))} images.")
 
 if __name__ == "__main__":
-    print("--- Dataset Balancer (Augmentation) ---")
-    target = input("Enter target number of images per class (default 200): ")
-    target = int(target) if target.strip() else 200
+    import argparse
     
-    augment_dataset('dataset', target)
+    parser = argparse.ArgumentParser(description="Dataset Balancer (Augmentation)")
+    parser.add_argument("--target", type=int, default=200, help="Target number of images per class")
+    parser.add_argument("--dir", type=str, default='dataset', help="Path to dataset directory")
+    
+    args = parser.parse_args()
+    
+    print("--- Dataset Balancer (Augmentation) ---")
+    augment_dataset(args.dir, args.target)
