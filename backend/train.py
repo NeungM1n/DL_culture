@@ -43,11 +43,10 @@ def train_model():
         print("Error: No images found in dataset folder.")
         return
 
-    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
     class_names = dataset.classes
     num_classes = len(class_names)
     
-    print(f"Classes found: {class_names}")
+    print(f"Classes found: {len(class_names)} classes")
 
     # Initialize model
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -56,24 +55,55 @@ def train_model():
     model = get_model(num_classes)
     model = model.to(device)
 
-    # Calculate class weights for imbalance handling
+    # [Resume] Load existing weights if requested
+    if RESUME and os.path.exists('culture_model.pth'):
+        print(f"Loading existing model weights from 'culture_model.pth'...")
+        try:
+            checkpoint = torch.load('culture_model.pth')
+            model_state = model.state_dict()
+            
+            # Filter out unnecessary keys (mismatched shapes)
+            pretrained_dict = {k: v for k, v in checkpoint.items() if k in model_state and v.size() == model_state[k].size()}
+            
+            # Overwrite entries in the existing state dict
+            model_state.update(pretrained_dict) 
+            
+            # Load the new state dict
+            model.load_state_dict(model_state)
+            
+            if len(pretrained_dict) < len(checkpoint):
+                print(f"Partial load: {len(pretrained_dict)}/{len(checkpoint)} layers loaded. (FC layer reset due to class change)")
+            else:
+                print("Resume successful! (All layers loaded)")
+                
+        except Exception as e:
+            print(f"Resume failed: {e}")
+
+    # Optimized: Use dataset.targets instead of iterating the whole dataset
     class_counts = [0] * num_classes
-    for _, label in dataset:
+    for label in dataset.targets:
         class_counts[label] += 1
     
-    print(f"Class counts: {dict(zip(class_names, class_counts))}")
-    
-    # Calculate weights: Total / (NumClasses * ClassCount)
+    # Calculate weights
     total_samples = sum(class_counts)
     class_weights = [total_samples / (num_classes * count) if count > 0 else 1.0 for count in class_counts]
     class_weights_tensor = torch.FloatTensor(class_weights).to(device)
-    print(f"Class weights: {class_weights}")
+
+    # Optimized DataLoader
+    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=8, pin_memory=True)
 
     criterion = nn.CrossEntropyLoss(weight=class_weights_tensor)
     optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9)
+    
+    # [Scheduler] Reduce LR if accuracy stops improving
+    # Removed verbose=True for compatibility with older PyTorch versions
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=3)
+
+    best_acc = 0.0
 
     # Training loop
     for epoch in range(NUM_EPOCHS):
+        model.train() # Set to training mode
         running_loss = 0.0
         correct = 0
         total = 0
@@ -98,23 +128,39 @@ def train_model():
 
         epoch_loss = running_loss / len(dataloader)
         epoch_acc = 100 * correct / total
-        print(f'Epoch {epoch+1}/{NUM_EPOCHS}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.2f}%')
+        
+        # Current Learning Rate
+        current_lr = optimizer.param_groups[0]['lr']
+        print(f'Epoch {epoch+1}/{NUM_EPOCHS}, Loss: {epoch_loss:.4f}, Acc: {epoch_acc:.2f}%, LR: {current_lr}')
+        
+        # Step Scheduler
+        scheduler.step(epoch_acc)
 
-    # Save model and class names
-    torch.save(model.state_dict(), 'culture_model.pth')
+        # Save Best Model
+        if epoch_acc > best_acc:
+            best_acc = epoch_acc
+            torch.save(model.state_dict(), 'culture_model_best.pth')
+            print(f"  -> New Best Model Saved! ({best_acc:.2f}%)")
+        
+        # Save Checkpoint (overwrite every epoch)
+        torch.save(model.state_dict(), 'culture_model.pth')
+
+    # Save class names
     with open('class_names.txt', 'w', encoding='utf-8') as f:
         f.write('\n'.join(class_names))
         
-    print("Training complete. Model saved as 'culture_model.pth'")
+    print(f"Training complete. Best Accuracy: {best_acc:.2f}%")
+    print("Best model saved as 'culture_model_best.pth'")
 
 if __name__ == '__main__':
     import argparse
     
     parser = argparse.ArgumentParser(description="Cultural Heritage Model Trainer")
     parser.add_argument("--epochs", type=int, default=30, help="Number of epochs")
-    parser.add_argument("--batch", type=int, default=4, help="Batch size")
+    parser.add_argument("--batch", type=int, default=32, help="Batch size")
     parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
     parser.add_argument("--dir", type=str, default='dataset', help="Dataset directory")
+    parser.add_argument("--resume", action="store_true", help="Resume training from existing model")
     
     args = parser.parse_args()
     
@@ -123,5 +169,6 @@ if __name__ == '__main__':
     BATCH_SIZE = args.batch
     LEARNING_RATE = args.lr
     DATA_DIR = args.dir
+    RESUME = args.resume
     
     train_model()

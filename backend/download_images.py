@@ -27,6 +27,10 @@ def download_images_bing(query, num_images=100, output_dir='dataset'):
         print(f"Search failed: {e}")
 
 
+import sys
+
+# ... (imports)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Cultural Heritage Image Downloader")
     parser.add_argument("--batch", action="store_true", help="Run in batch mode using landmarks.txt")
@@ -35,8 +39,16 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    if args.batch:
-        # Batch mode from CLI
+    # Check for non-interactive mode (e.g., nohup)
+    is_non_interactive = False
+    try:
+        if not sys.stdin.isatty():
+            is_non_interactive = True
+    except:
+        is_non_interactive = True
+
+    if args.batch or (is_non_interactive and os.path.exists('landmarks.txt') and not args.query):
+        # Batch mode from CLI or Auto-detected
         if os.path.exists('landmarks.txt'):
             with open('landmarks.txt', 'r', encoding='utf-8') as f:
                 landmarks = [line.strip() for line in f if line.strip()]
