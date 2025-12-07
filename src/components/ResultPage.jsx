@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ResultPage = ({ result, image, onReset, onChat }) => {
+const ResultPage = ({ result, image, onReset, onChat, onSelectAlternative }) => {
     return (
         <div className="glass-panel animate-fade-in">
             <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
@@ -66,7 +66,7 @@ const ResultPage = ({ result, image, onReset, onChat }) => {
                                     alignItems: 'center',
                                     gap: '6px'
                                 }}
-                                onClick={() => alert(`'${alt.name}' 선택 기능은 추후 업데이트 예정입니다.`)}
+                                onClick={() => onSelectAlternative && onSelectAlternative(alt)}
                             >
                                 <span>{alt.name}</span>
                                 <span style={{ opacity: 0.7, fontSize: '0.75rem' }}>{alt.confidence}%</span>

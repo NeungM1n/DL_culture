@@ -31,6 +31,15 @@ function App() {
     setSelectedImage(null);
   };
 
+  const handleSelectAlternative = (alternative) => {
+    setAnalysisResult(prev => ({
+      ...prev,
+      name: alternative.name,
+      description: alternative.description,
+      matchPercentage: alternative.confidence
+    }));
+  };
+
   return (
     <div className="app-container" style={{ width: '100%', maxWidth: '600px', padding: '20px' }}>
       {currentView === 'landing' && (
@@ -51,6 +60,7 @@ function App() {
           image={selectedImage}
           onReset={handleReset}
           onChat={() => setCurrentView('chat')}
+          onSelectAlternative={handleSelectAlternative}
         />
       )}
 

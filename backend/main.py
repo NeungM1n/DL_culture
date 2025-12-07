@@ -108,9 +108,11 @@ async def predict(file: UploadFile = File(...)):
     for i in range(1, len(topk_indices[0])):
         idx = topk_indices[0][i].item()
         prob = int(topk_probs[0][i].item() * 100)
+        alt_name = class_names[idx]
         alternatives.append({
-            "name": class_names[idx],
-            "confidence": prob
+            "name": alt_name,
+            "confidence": prob,
+            "description": DESCRIPTIONS.get(alt_name, "설명이 준비되지 않은 문화재입니다.")
         })
 
     description = DESCRIPTIONS.get(class_name, "설명이 준비되지 않은 문화재입니다.")
