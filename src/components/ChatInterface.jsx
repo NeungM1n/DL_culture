@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { chatWithAI } from '../services/aiService';
 
-const ChatInterface = ({ context, onBack }) => {
+const ChatInterface = ({ context, onBack, language, t }) => {
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: `안녕하세요! ${context.name}에 대해 궁금한 점이 있으신가요?` }
+        { role: 'assistant', content: t.chat_greeting.replace('{name}', context.name) }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,8 @@ const ChatInterface = ({ context, onBack }) => {
         setIsLoading(true);
 
         try {
-            const responseContent = await chatWithAI(input, context, messages);
+            // Pass language to AI service
+            const responseContent = await chatWithAI(input, context, messages, language);
             const aiResponse = {
                 role: 'assistant',
                 content: responseContent
@@ -34,7 +35,7 @@ const ChatInterface = ({ context, onBack }) => {
             setMessages(prev => [...prev, aiResponse]);
         } catch (error) {
             console.error(error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "죄송합니다. 오류가 발생했습니다." }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: t.chat_error }]);
         } finally {
             setIsLoading(false);
         }
@@ -56,9 +57,9 @@ const ChatInterface = ({ context, onBack }) => {
                 justifyContent: 'space-between'
             }}>
                 <button className="btn-secondary" onClick={onBack} style={{ padding: '5px 10px', fontSize: '0.8rem' }}>
-                    ← 뒤로
+                    ← {t.chat_back}
                 </button>
-                <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{context.name} 챗봇</span>
+                <span style={{ fontWeight: 'bold', color: 'var(--primary-color)' }}>{t.chat_title}</span>
                 <div style={{ width: '40px' }}></div> {/* Spacer */}
             </div>
 
@@ -82,7 +83,7 @@ const ChatInterface = ({ context, onBack }) => {
                 ))}
                 {isLoading && (
                     <div style={{ alignSelf: 'flex-start', color: '#aaa', fontSize: '0.9rem' }}>
-                        답변 작성 중...
+                        {t.chat_loading}
                     </div>
                 )}
                 <div ref={messagesEndRef} />
@@ -94,7 +95,7 @@ const ChatInterface = ({ context, onBack }) => {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="궁금한 점을 물어보세요..."
+                    placeholder={t.chat_placeholder}
                     style={{
                         flex: 1,
                         padding: '12px',
@@ -106,7 +107,7 @@ const ChatInterface = ({ context, onBack }) => {
                     }}
                 />
                 <button className="btn-primary" onClick={handleSend} disabled={isLoading}>
-                    전송
+                    {t.chat_send}
                 </button>
             </div>
         </div>

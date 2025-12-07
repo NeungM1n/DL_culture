@@ -31,7 +31,7 @@ export const analyzeImage = async (file) => {
     }
 };
 
-export const chatWithAI = async (message, context, history) => {
+export const chatWithAI = async (message, context, history, language = 'ko') => {
     try {
         const response = await fetch('http://localhost:8000/chat', {
             method: 'POST',
@@ -40,7 +40,8 @@ export const chatWithAI = async (message, context, history) => {
             },
             body: JSON.stringify({
                 message: message,
-                context: context.name || "알 수 없는 문화재"
+                context: context.name || "알 수 없는 문화재",
+                language: language
             }),
         });
 

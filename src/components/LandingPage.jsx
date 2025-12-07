@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-const LandingPage = ({ onUpload }) => {
+const LandingPage = ({ onUpload, t }) => {
     const fileInputRef = useRef(null);
     const videoRef = useRef(null);
     const canvasRef = useRef(null);
@@ -25,7 +25,7 @@ const LandingPage = ({ onUpload }) => {
             }, 100);
         } catch (err) {
             console.error("Error accessing camera:", err);
-            alert("카메라에 접근할 수 없습니다. 권한을 확인해주세요.");
+            alert("Camera access denied.");
         }
     };
 
@@ -63,10 +63,10 @@ const LandingPage = ({ onUpload }) => {
     return (
         <div className="glass-panel animate-fade-in" style={{ textAlign: 'center', padding: '3rem 2rem' }}>
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>
-                문화재 찾기
+                {t.app_title}
             </h1>
-            <p style={{ marginBottom: '2rem', color: 'var(--text-secondary)' }}>
-                사진을 찍거나 업로드하여<br />우리 문화재의 이야기를 들어보세요.
+            <p style={{ marginBottom: '2rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+                {t.upload_title}<br />{t.upload_desc}
             </p>
 
             <div
@@ -83,7 +83,7 @@ const LandingPage = ({ onUpload }) => {
                 onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--glass-border)'}
             >
                 <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📸</div>
-                <p>여기를 클릭하여 사진 업로드</p>
+                <p>{t.upload_btn}</p>
             </div>
 
             <input
@@ -99,13 +99,13 @@ const LandingPage = ({ onUpload }) => {
                     className="btn-primary"
                     onClick={() => fileInputRef.current.click()}
                 >
-                    사진 업로드
+                    {t.upload_btn}
                 </button>
                 <button
                     className="btn-secondary"
                     onClick={startCamera}
                 >
-                    카메라 켜기
+                    {t.camera_btn}
                 </button>
             </div>
 

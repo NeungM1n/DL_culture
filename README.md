@@ -1,137 +1,128 @@
-# 🏛️ CultureFinder (문화재 찾기) - AI 기반 문화재 식별 서비스
+# 🏛️ CultureFinder (문화재 찾기) - AI 기반 문화재 식별 및 가이드 서비스
 
-**CultureFinder**는 딥러닝(Deep Learning)과 생성형 AI(LLM)를 결합하여, 사용자가 촬영한 문화재 사진을 분석하고 상세한 설명을 제공하는 웹 애플리케이션입니다.
+**딥러닝(Deep Learning)**과 **생성형 AI(LLM)**를 결합하여, 사용자가 촬영한 문화재 사진을 분석하고 3개 국어(한국어, 영어, 중국어)로 상세한 설명을 제공하는 인공지능 웹 애플리케이션입니다.
 
-단순한 이미지 분류를 넘어, **나만의 데이터셋 구축부터 원격 GPU 서버 학습, 그리고 웹 서비스 배포까지** 경험할 수 있는 올인원 프로젝트입니다.
+> **프로젝트 개요**
+> 본 프로젝트는 단순한 이미지 분류 모델 구현을 넘어, **데이터셋 구축(수집/증강)부터 모델 학습(PyTorch), 백엔드 API 서버(FastAPI), 그리고 최종 웹 서비스 배포(React)**까지의 전 과정을 아우르는 올인원 딥러닝 프로젝트입니다.
 
 ---
 
 ## ✨ 주요 기능 (Key Features)
 
-1.  **📸 실시간 촬영 및 분석**
-    *   웹 브라우저에서 카메라를 구동하여 즉시 분석하거나, 고화질 사진을 업로드할 수 있습니다.
-2.  **🧠 고성능 AI 모델 (ResNet18 + Custom Training)**
-    *   **1,500여 개의 주요 문화재(국보, 보물, 사적)**를 식별할 수 있는 커스텀 모델을 탑재했습니다.
-    *   데이터 증강(Augmentation)과 전이 학습(Transfer Learning)을 통해 높은 정확도를 확보했습니다.
-3.  **🥈 대안 제시 (Top 4 Alternatives)**
-    *   AI가 가장 확신하는 정답뿐만 아니라, 2, 3, 4순위 후보도 함께 보여주어 정확도를 보완합니다.
-    *   사용자가 "이게 아닌데?" 싶을 때 다른 후보를 선택하여 바로잡을 수 있습니다.
-4.  **💬 AI 도슨트 (LLM Chat)**
-    *   **Google Gemini 2.0 Flash** 모델이 탑재되어, 식별된 문화재에 대해 궁금한 점을 자유롭게 물어볼 수 있습니다.
-    *   문화재의 역사, 특징, 관람 포인트 등을 대화하듯 알려줍니다.
-5.  **🎨 Glassmorphism UI**
-    *   현대적이고 세련된 글래스모피즘 디자인을 적용하여 몰입감 있는 사용자 경험을 제공합니다.
+### 1. 📸 실시간 문화재 식별 (Real-time Identification)
+*   **카메라/업로드 지원**: 모바일/PC 카메라로 즉시 촬영하거나 고화질 사진을 업로드하여 분석할 수 있습니다.
+*   **Top-K 예측**: AI가 가장 확신하는 1순위 결과뿐만 아니라, **2~4순위 후보**도 함께 제시하여 정답 가능성을 보완합니다.
+
+### 2. 🌍 다국어 도슨트 (Multi-language Support)
+*   **글로벌 가이드**: 외국인 관광객을 위해 **한국어(KO), 영어(EN), 중국어(ZH)** 3개 국어로 설명을 제공합니다.
+*   **자동 생성**: Google Gemini 2.0 Flash 모델을 활용하여 1,500여 개 문화재에 대한 고품질 설명을 자동으로 생성 및 DB화했습니다.
+
+### 3. 🧠 고성능 커스텀 AI 모델
+*   **방대한 클래스**: 국보, 보물, 사적 등 총 **1,500개 클래스**를 구분할 수 있는 ResNet18 기반 커스텀 모델입니다.
+*   **전이 학습(Transfer Learning)**: ImageNet 사전 학습 가중치를 활용하고, 커스텀 데이터셋으로 Fine-tuning하여 높은 정확도를 확보했습니다.
+
+### 4. 💬 AI 챗봇 (Interactive AI Chat)
+*   **심층 질의응답**: 식별된 문화재에 대해 더 궁금한 점이 있다면 AI 챗봇에게 바로 물어볼 수 있습니다.
+*   **맥락 인식**: 현재 보고 있는 문화재가 무엇인지 AI가 인지하고 있어, 자연스러운 대화가 가능합니다.
+
+### 5. 🎨 몰입형 UI (Glassmorphism Design)
+*   현대적이고 세련된 **글래스모피즘(Glassmorphism)** 디자인 시스템을 적용하여, 앱 사용 경험을 극대화했습니다.
 
 ---
 
 ## 🛠️ 기술 스택 (Tech Stack)
 
-### Frontend
-*   **React (Vite)**: 빠르고 가벼운 프론트엔드 개발 환경
-*   **Vanilla CSS**: Glassmorphism 디자인 시스템 직접 구현 (No Framework)
-*   **Axios**: 백엔드 API 통신
-
-### Backend
-*   **Python 3.10+**: 핵심 언어
-*   **FastAPI**: 고성능 비동기 웹 프레임워크 (API 서버)
-*   **Uvicorn**: ASGI 서버
-*   **Google Generative AI (Gemini)**: LLM 기반 챗봇 및 설명 생성
-
-### AI / Deep Learning
-*   **PyTorch**: 딥러닝 모델 학습 및 추론
-*   **Torchvision**: ResNet18 모델 및 이미지 전처리/증강
-*   **Pandas**: 데이터셋 메타데이터 처리 (`heritage_list.xls`)
-*   **icrawler**: 이미지 데이터 자동 수집
+| 구분 | 기술 스택 | 설명 |
+| :--- | :--- | :--- |
+| **Frontend** | **React (Vite)** | 빠르고 가벼운 SPA 프레임워크 |
+| | **Vanilla CSS** | 커스텀 디자인 시스템 직접 구현 |
+| | **Axios** | 비동기 백엔드 API 통신 |
+| **Backend** | **Python 3.10+** | 핵심 프로그래밍 언어 |
+| | **FastAPI** | 고성능 API 서버 프레임워크 |
+| | **Google Gemini** | 설명 데이터 생성 및 챗봇 구현 |
+| **Deep Learning** | **PyTorch** | 모델 설계, 학습 및 추론 |
+| | **Torchvision** | 이미지 전처리 및 ResNet 모델 로드 |
+| | **icrawler** | 이미지 데이터 자동 수집 |
 
 ---
 
-## 📂 프로젝트 파일 구조 (File Structure)
+## 📂 프로젝트 구조 (File Structure)
 
-### 1. Backend (`/backend`)
-*   **`main.py`**: FastAPI 서버의 진입점. 이미지 분석(`/predict`) 및 채팅(`/chat`) API를 제공합니다.
-*   **`train.py`**: AI 모델 학습 스크립트.
-    *   `--resume`: 중단된 학습 이어하기 기능
-    *   `Scheduler`: 학습률 자동 조절 (ReduceLROnPlateau)
-    *   `Best Model Saving`: 최고 성능 모델 자동 저장
-*   **`model.py`**: ResNet18 모델 정의 및 수정 (Transfer Learning).
-*   **`download_images.py`**: `landmarks.txt`에 있는 문화재 목록을 바탕으로 이미지를 자동 수집합니다. (병렬 처리 지원)
-*   **`augment_dataset.py`**: 부족한 데이터를 회전/반전/색변환하여 목표 수량까지 자동으로 증강합니다. (Multiprocessing 지원)
-*   **`extract_landmarks.py`**: 엑셀 파일(`heritage_list.xls`)에서 주요 문화재(국보, 보물 등) 1,500개를 추출합니다.
-*   **`generate_descriptions.py`**: Gemini API를 이용해 1,500개 문화재의 설명을 자동으로 생성하여 `descriptions.json`에 저장합니다.
-*   **`evaluate_model.py`**: 학습된 모델의 성능을 정밀 분석(Top-5 정확도, 오답 노트)합니다.
+### `/backend` (핵심 로직 및 AI)
+*   **`model.py`**: ResNet18 모델 아키텍처 정의 (Class 수: 1,500).
+*   **`train.py`**: 모델 학습을 위한 메인 스크립트.
+    *   *Features*: Resume 학습, Learning Rate Scheduling, Best Model 저장.
+*   **`main.py`**: FastAPI 서버. 이미지 분석(`POST /predict`) 및 채팅(`POST /chat`) API 제공.
+*   **`generate_descriptions.py`**: **[NEW]** Gemini API를 활용한 다국어 설명 데이터 생성 스크립트.
+*   **`descriptions.json`**: 생성된 문화재 설명 데이터 (3개 국어 포함).
+*   **`extract_landmarks.py`**: 원시 데이터(`heritage_list.xls`)에서 학습 대상 추출.
+*   **`download_images.py` / `augment_dataset.py`**: 데이터 수집 및 증강 파이프라인.
 
-### 2. Frontend (`/src`)
-*   **`App.jsx`**: 전체 앱의 상태 관리 (화면 전환, 결과 데이터 유지).
-*   **`components/LandingPage.jsx`**: 카메라 촬영 및 파일 업로드 화면.
-*   **`components/ResultPage.jsx`**: 분석 결과 표시, 대안 선택, 채팅 진입 화면.
-*   **`components/ChatInterface.jsx`**: AI와의 실시간 채팅 화면.
-*   **`services/aiService.js`**: 백엔드 API 호출 로직 분리.
+### `/src` (사용자 인터페이스)
+*   **`App.jsx`**: 앱의 메인 라우팅 및 상태 관리.
+*   **`components/`**: `LandingPage`(입력), `ResultPage`(결과), `ChatInterface`(채팅) 등 화면 구성 요소.
+*   **`services/`**: API 통신 로직 모듈화.
 
 ---
 
-## 🚀 데이터셋 구축 및 학습 가이드 (Workflow)
+## 🚀 프로젝트 실행 가이드 (How to Run)
 
-이 프로젝트는 **데이터 수집 -> 증강 -> 학습 -> 배포**의 전체 파이프라인을 포함합니다.
+본 프로젝트를 로컬 환경에서 실행하기 위한 단계별 가이드입니다.
 
-### 1. 데이터 준비
+### 1. 환경 설정 (Prerequisites)
+*   Python 3.10 이상 설치
+*   Node.js 및 npm 설치
+*   Google Gemini API Key 발급
+
+### 2. 백엔드 설정 및 실행
 ```bash
-# 1. 문화재 목록 추출
-python extract_landmarks.py
-
-# 2. 이미지 다운로드 (서버 권장)
-python download_images.py --batch --count 50
-
-# 3. 데이터 증강 (서버 권장)
-python augment_dataset.py --target 200
-```
-
-### 2. 모델 학습 (Remote Server)
-```bash
-# 학습 시작 (50 Epoch, Batch 32)
-python train.py --epochs 50 --batch 32
-
-# (선택) 학습 중단 시 이어하기
-python train.py --epochs 50 --batch 32 --resume
-```
-
-### 3. 설명 데이터 생성
-```bash
-# Gemini가 설명 자동 작성
-python generate_descriptions.py
-```
-
----
-
-## 🏃‍♂️ 실행 방법 (How to Run)
-
-학습이 완료된 후, 웹 서비스를 실행하는 방법입니다.
-
-### 1. Backend 실행
-```bash
+# 1. 백엔드 폴더로 이동
 cd backend
-# 가상환경 활성화 (선택)
-# conda activate dl_pj7 
 
+# 2. 필수 라이브러리 설치
+pip install -r requirements.txt
+
+# 3. 환경 변수 설정 (.env 파일 생성)
+# VITE_API_KEY=your_google_api_key_here
+
+# 4. 서버 실행
 uvicorn main:app --reload
 ```
-*   서버가 `http://localhost:8000`에서 실행됩니다.
+*   서버 정상 작동 시: `http://localhost:8000` 접속 가능
 
-### 2. Frontend 실행
+### 3. 프론트엔드 설정 및 실행
 ```bash
-# 새 터미널에서 실행
+# 새 터미널 창을 열고 루트 경로에서 실행
+# 1. 의존성 설치
+npm install
+
+# 2. 개발 서버 실행
 npm run dev
 ```
-*   브라우저가 `http://localhost:5173`에서 실행됩니다.
+*   브라우저에서 `http://localhost:5173` 접속하여 서비스 이용
 
 ---
 
-## ⚠️ 주의사항 (Troubleshooting)
+## 📊 데이터셋 및 학습 파이프라인 (Data Pipeline)
 
-*   **API Key**: `backend/.env` 파일에 `VITE_API_KEY`가 올바르게 설정되어 있어야 채팅 및 설명 생성이 가능합니다.
-*   **Model File**: `backend/culture_model.pth` 파일이 없으면 서버가 시작되지 않습니다. (학습 후 다운로드 필요)
-*   **CORS**: 프론트엔드와 백엔드의 포트가 다르므로 `main.py`의 CORS 설정이 중요합니다. (현재 모든 오리진 허용됨)
+본 프로젝트는 데이터의 양과 질을 확보하기 위해 체계적인 파이프라인을 구축했습니다.
+
+1.  **목록 추출**: 문화재청 데이터를 기반으로 학습 가치가 높은 1,500종 선정.
+2.  **자동 수집**: 검색 엔진(Bing, Google) 크롤링을 통해 클래스당 초기 이미지 확보.
+3.  **데이터 정제**: 손상된 이미지 제거 및 형식 통일 (RGB, Resize).
+4.  **데이터 증강**: 회전(Rotation), 반전(Flip), 색상 변환(Color Jitter) 등을 통해 데이터 다양성 확보 (강건한 모델 학습).
+5.  **다국어 데이터 생성**: LLM을 활용하여 정제된 텍스트 데이터 베이스 구축.
 
 ---
 
-**Developed by [Your Name]**
-*Powered by Google Gemini & PyTorch*
+## 🎓 결론 및 기대 효과
+
+이 프로젝트는 최신 AI 기술을 활용하여 **'문화재'라는 전통적인 소재를 현대적인 서비스로 재해석**했습니다.
+특히 다국어 지원을 통해 내국인뿐만 아니라 외국인 관광객들에게도 우리 문화유산의 가치를 효과적으로 전달할 수 있는 가능성을 제시합니다.
+
+---
+
+**Project Members**
+*   [팀원 이름 1] - 모델 설계 및 학습, 데이터셋 구축
+*   [팀원 이름 2] - 백엔드 API 개발, 프롬프트 엔지니어링
+*   [팀원 이름 3] - 프론트엔드 UI/UX 개발, 서비스 연동
